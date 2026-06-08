@@ -6,12 +6,12 @@ data Participante = UnParticipante {
     nombre :: String,
     trucosDeCocina :: [Truco],
     platoDeEspecialidad :: Plato
-}
+} 
 
 data Plato = UnPlato {
     dificultad :: Number, --Recordar que va de 0 a 10
     componentes :: Componentes
-}
+} deriving (Eq, Show)
 
 type Ingrediente = String
 type PesoEnGramos = Number
@@ -77,7 +77,7 @@ esSinTacc::Informacion
 esSinTacc unPlato =  not(contieneIngrediente "harina" unPlato) 
 
 esComplejo::Informacion
-esComplejo unPlato = length(componentes unPlato) > 5 && dificultad unPlato > 7
+esComplejo unPlato = dificultad unPlato > 7 && length(componentes unPlato) > 5 
 
 noAptoHipertension::Informacion
 noAptoHipertension unPlato = cantidadDeGramosDe "sal" unPlato > 2
@@ -115,3 +115,30 @@ participanteEstrella [participantes] = participantes
 participanteEstrella (participante1:participante2:restoDeParticipantes)
     |esMejorQue (cocinar participante1) (cocinar participante2) = participanteEstrella(participante1:restoDeParticipantes)
     |otherwise = participanteEstrella(participante2:restoDeParticipantes)
+
+-- PARTE D
+armarComponente::Number->Componente
+armarComponente n = ("ingredientes" ++ show n, n)
+
+platinum::Plato
+platinum = UnPlato {
+    dificultad = 10,
+    componentes = map armarComponente[1..]
+}
+
+{-
+Que pasa si aplicamos los siguientes trucos a Platinum:
+- endulzar: Funciona, ya que lo que hace la funcion endulzar es agregar el ingrediente azucar al inicio de la lista infinita de ingredientes
+- salar: Funciona, ya que lo que hace la funcion salar es agregar el ingrediente sal al inicio de la lista infinita de ingredientes
+- darSabor: Funciona, aplica la funcion salar y endulzar, por lo que agrega ambos ingredientes al inicio de la lista infinita de ingredientes
+- duplicarPorcion: No termina, ya que la funcion recorre cada elemento de la lista de ingredientes y duplica su peso, por lo que nunca terminaría de recorrer la lista. Sin embargo, se queda ejecutando la funcion infinitamente.
+- simplificar: No termina, ya que nunca terminaria de filtrar los ingredientes pesados de la lista porque nunca terminaría de recorrerla
+
+Que pasa si queremos conocer información del Platinum:
+- esVegano: No termina, ya que nunca podria terminar de verificar si contiene algun ingrediente que se llame "carne", "huevo" o "lacteo"
+- esSinTacc: No termina, ya que nunca podria terminar de verificar si contiene algun ingrediente que se llame "harina"
+- esComplejo: Funciona, ya que una vez que verifica que la dificultad es >7 y la cantidad de componentes del plato es >5, tiraria true en ambos lados del &&
+- noAptoHipertension: No termina, ya que tendría que filtrar una lista infinita de ingredientes para ver si tiene sal en el plato
+
+Con respecto a si Platinum es mejor que otro plato, esto va a depender del plato con el que lo estemos comparando, pero en la parte de la función en la que tiene que sumar los pesos, nunca va a terminar de sumar todos los pesos de los ingredientes del platinum. Por lo que no termina.
+-}
